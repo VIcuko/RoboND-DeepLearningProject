@@ -202,10 +202,10 @@ validation_steps = 50
 workers = 4
 ```
 
-10 epochs => approximately 3 hours
+This process took approximately 3 hours to execute (15-20 mins per epoch) and gave a final result of 0.32, which happend to be a bit disappointing.
 
 
-I trained the network in my o
+
 
 
 ## 5. Results and Improvements  
