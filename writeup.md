@@ -191,6 +191,20 @@ Since I haven't had the AWS p2x.large instance approved yet, I tried carrying ou
 
 First I carried out a couple of executions with a reduced number of epochs in order to optimize the amount of time it took for the training process and avoid having the process working for too long.
 
+The definition of each component of the hyperparameters is the following:
+
+*batch_size*: number of training samples/images that get propagated through the network in a single pass.
+
+*num_epochs*: number of times the entire training dataset gets propagated through the network.
+
+*steps_per_epoch*: number of batches of training images that go through the network in 1 epoch. One recommended value to try would be based on the total number of images in training dataset divided by the batch_size.
+
+*validation_steps*: number of batches of validation images that go through the network in 1 epoch. This is similar to steps_per_epoch, except validation_steps is for the validation dataset.
+
+*workers*: maximum number of processes to spin up.
+
+workers: This is the number of processes we can start on the CPU/GPU.
+
 My initial hyperparameters were the following:
 
 ```python
