@@ -1,6 +1,6 @@
 # Follow Me! Deep Learning Project
-## Robotics Nanodegree
-## Udacity
+# Robotics Nanodegree
+# Udacity
 
 ## Contents
 [1. Project objective](#1.-project-objective)  
