@@ -2,7 +2,7 @@
 # Robotics Nanodegree
 # Udacity
 
-## Contents
+## Content
 [1. Project Objective](#1.-project-objective)  
 [2. Data Collection Process](#2.-data-collection-process)  
 [3. Network Architecture](#3.-network-architecture)  
@@ -25,12 +25,12 @@ Along this writeup, I will be explaining the remaining points indicated in the c
 ## 2. Data Collection Process
 For carrying out the data collection process, I used the QuadRotor simulator supplied by Udacity. Here, the objective was to take several collections of images involving the target individual (the hero) in several scenarios. In my case I recorded 3 different scenarios indicated below:
 
-Scenario 1:
+**Scenario 1:**  
 In this scenario I defined patrol points around an area going from a high height distance down to an earth high distance from the hero with crossing paths (view image below). In this case I didn't spawn any people in the scenario, instead the scenario already contains additional obstacles such as trees in the middle.
 
 ![Test scenario 1][test-scenario1]
 
-Scenario 2:
+**Scenario 2:**  
 In this scenario, I followed the recommendations in the project guidelines to spawn the hero in a zigzag trajectory and at the same time move the drone along in a linear trajectory. At first I tried the following combination:
 
 ![Test scenario 2 case a][test-scenario2a]
@@ -42,7 +42,7 @@ But after beginning recording I realized I had defined too many patrol points an
 
 This path happened to be much more efficient than the previous one, resulting in a larger number of images containing the hero.
 
-Scenario 3:
+**Scenario 3:**  
 In this scenario I drew a complex path inside a specific circular area for the hero and spawned a considerable amount of people from the middle of the area, having the drone patrol all over this same area, in order to obtain images of the hero in between varying amount of people:
 
 ![Test scenario 3 image 1][test-scenario31]
@@ -51,11 +51,11 @@ In this scenario I drew a complex path inside a specific circular area for the h
 The data recorded for each of the scenarios is the following:
 
 Run number | Data sets collected | Images per data set
------------- | -------------
+------------ | ------------- | -------------
 Run 1 | 133 data set | 4 images per data set
 Run 2 | 584 data set | 4 images per data set
 Run 3 | 1054 data set | 4 images per data set
-**Total** | 1771 data set | 4 images per data set
+**Total** | **1771 data set** | **4 images per data set**
 
 
 ## 3. Network Architecture  
