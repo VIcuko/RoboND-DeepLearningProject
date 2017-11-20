@@ -60,9 +60,37 @@ Run 3 | 1054 data set | 4 images per data set
 
 ## 3. Network Architecture  
 
+The fully convolutional network I used for this project consists of an encoding stage (2 encoding layers) connected to a decoding stage (2 decoding layers) via a 1x1 convolutional layer (view table below).
+
+We know that the original image size of 256 x 256 x 3 has been resized to 160 x 160 x 3 with the data_iterator.py as it is indiated in the jupyter notebook for the project. This gives our input layer size input = 160,160,3.
+
+After carrying out some small tests and checking with other students in the slack forum I decided to go on with the following cofiguration since it seemed to be the one giving better results at the same time it kept the solution simple and avoid computational excessive time:
+
+Layer name | Layer description | Dimensions
+------------ | ------------- | -------------
+**Input** | Input data | 160 x 160 x 3
+Layer 1 | Encoder | 80 x 80 x 32
+Layer 2 | Encoder | 40 x 40 x 64
+Layer 3 | Convolution | 40 x 40 x 128
+Layer 4 | Decoder | 40 x 40 x 64
+Layer 5 | Decoder | 80 x 80 x 32
+**Output** | Output data | 160 x 160 x 3
+
+This configuration part was actually quite interesting in order to have a deeper knowledge on 
+
+
+
 
 
 ## 4. Training  
+Since I haven't had the AWS p2x.large instance approved yet, I tried carrying out the training in another instance I already had approved in AWS with unsatisfactory results. For this reason I ended up executing the training process in my own computer (MacBook Pro with NVIDIA GeForce GT 750M graphics card using CUDA and CUDNN).
+
+First I carried out a couple of executions with a reduced number of epochs in order to optimize the amount of time it took for the training process and avoid having the process working for too long. 
+
+10 epochs => approximately 3 hours
+
+
+I trained the network in my o
 
 
 ## 5. Results and Improvements  
