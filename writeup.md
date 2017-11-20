@@ -62,7 +62,16 @@ Run 3 | 1054 data set | 4 images per data set
 
 The fully convolutional network I used for this project consists of an encoding stage (2 encoding layers) connected to a decoding stage (2 decoding layers) via a 1x1 convolutional layer (view table below).
 
-We know that the original image size of 256 x 256 x 3 has been resized to 160 x 160 x 3 with the data_iterator.py as it is indiated in the jupyter notebook for the project. This gives our input layer size input = 160,160,3.
+We know that the original image size of 256 x 256 x 3 has been resized to 160 x 160 x 3 with the data_iterator.py as it is indicated in the jupyter notebook for the project.
+
+By using a 1 x 1 convolutional layer we can take in any image size, as opposed to a fully connected layer which would then require a very specific set of input dimensions.
+
+*Encoders*  
+The role of the encoders in the network is to identify the important features in the images being loaded, then keep those features in memory and remove any added noise, decreasing the width and height at the same time they increase the depth of the layer.
+
+For the first encoding layer I chose the following parameters:
+
+
 
 After carrying out some small tests and checking with other students in the slack forum I decided to go on with the following cofiguration since it seemed to be the one giving better results at the same time it kept the solution simple and avoid computational excessive time:
 
