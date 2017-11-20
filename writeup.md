@@ -15,6 +15,7 @@
 [test-scenario2b2]: ./writeup_images/test-scenario2b2.png
 [test-scenario31]: ./writeup_images/test-scenario31.png
 [test-scenario32]: ./writeup_images/test-scenario32.png
+[network-diagram]: ./writeup_images/network-diagram.png
 
 ## 1. Project Objective 
 The objective of this project is to train a fully convolutional network with images from various scenarios regarding a virtual environment where  a hero is spawned along with people simulations and the corresponding surroundings. The purpose is that the drone using the trained model is able to follow the hero regardless of the obstacles and people along its path. To carry out this, each pixel in the image is classified as either belonging to the target hero or as part of something or someone else in the environment.
@@ -66,14 +67,7 @@ We know that the original image size of 256 x 256 x 3 has been resized to 160 x 
 
 By using a 1 x 1 convolutional layer we can take in any image size, as opposed to a fully connected layer which would then require a very specific set of input dimensions.
 
-*Encoders*  
-The role of the encoders in the network is to identify the important features in the images being loaded, then keep those features in memory and remove any added noise, decreasing the width and height at the same time they increase the depth of the layer.
-
-For the first encoding layer I chose the following parameters:
-
-
-
-After carrying out some small tests and checking with other students in the slack forum I decided to go on with the following cofiguration since it seemed to be the one giving better results at the same time it kept the solution simple and avoid computational excessive time:
+After carrying out some small tests and checking with other students I decided to go on with the following cofiguration since it seemed to be the one giving better results at the same time it kept the solution simple and avoid computational excessive time:
 
 Layer name | Layer description | Dimensions
 ------------ | ------------- | -------------
@@ -85,16 +79,128 @@ Layer 4 | Decoder | 40 x 40 x 64
 Layer 5 | Decoder | 80 x 80 x 32
 **Output** | Output data | 160 x 160 x 3
 
-This configuration part was actually quite interesting in order to have a deeper knowledge on 
+![Network diagram][network-diagram]
 
+Below I'm describing the steps for this configuration in further detail:
 
+*Encoders*  
+The role of the encoders in the network is to identify the important features in the images being loaded, then keep those features in memory and remove any added noise, decreasing the width and height at the same time they increase the depth of the layer.
 
+For the encoder block, I included a separable convolution layer using the separable_conv2d_batchnorm() function as follows:
 
+```python
+def encoder_block(input_layer, filters, strides):
+    output_layer = separable_conv2d_batchnorm(input_layer, filters, strides)
+    return output_layer
+```
+
+For the first encoding layer I chose the following parameters:
+
+Encoder layer | Filters | Strides
+------------ | ------------- | -------------
+Layer 1 | 32 | 2
+Layer 2 | 64 | 2
+
+The choice of using 2 strides is to lose some height and width for the following layer enabling a better processing time for the training process.
+
+In order to determine the size of the following layers, I have used the equation shown during the course:  
+
+`(N-F + 2*P)/S + 1`  
+
+Substituting the corresponding values in the equation we get the following:  
+
+`layer1_height/width = (160-3 + 2*1)/2 +1 => 80`
+
+Therefore the layer 1 dimensions will be: 80 x 80 x 32 (since I chose 32 filters) 
+
+Applying the same logic, layer 2 will have a dimensions of: 40 x 40 x 64 (since I chose 64 filters)
+
+The resulting code will be the following inside the fcn_model function:
+
+```python
+layer1 = encoder_block(inputs, filters=32, strides=2)
+layer2 = encoder_block(layer1, filters=64, strides=2)
+```
+
+*Convolution layer*  
+The convolution layer is placed between the encoder layers and the decoder layers.
+I have used a 1 x 1 convolution layer with the purpose of semantic segmentation. This has several advantages for the network:
+
+1. As indicated before, it helps make the network more flexible by allowing different size input images.
+1. It preserves the spatial information of the image at the same time it decreases the dimension.
+
+In this case I used 128 filters for this layer.
+
+Therefore, the corresponding line of code within the fcn_model function is:
+
+```python
+layer3 = conv2d_batchnorm(layer2, filters=128, kernel_size=1, strides=1)
+```
+
+*Decoder*
+Within the decoding process, the upsampling part is very important, in order to transform the downsampled image back into the resolution of the original input image. 
+
+In order to carry out the upsample process I used the bilinear upsample function provided in the notebook:   
+
+```python
+def bilinear_upsample(input_layer):
+    output_layer = BilinearUpSampling2D((2,2))(input_layer)
+    return output_layer
+```
+
+Additionally, I have concatenated the layers in order to help skip connections and added some separable convolution layers.
+
+The resulting code for the decoding block is the following:
+
+```python
+def decoder_block(small_ip_layer, large_ip_layer, filters):
+    upsampled_layer = bilinear_upsample(small_ip_layer)
+    concatenated_layer = layers.concatenate([upsampled_layer, large_ip_layer])
+    output_layer = separable_conv2d_batchnorm(concatenated_layer, filters)
+    output_layer = separable_conv2d_batchnorm(output_layer, filters)
+    return output_layer
+```
+
+Regarding the fcn_model function, the selection for the decoders was the one required to scale back up the image from the convolutional layer in order to ouput it. Having therefore the 1st decoding layer 64 filters and the 2nd layer 32 filters. The resulting lines in the fcn_model function are the following:
+
+```python
+layer4 = decoder_block(layer3, layer1, filters=64)
+layer5 = decoder_block(layer4, inputs, filters=32)
+```
+
+*Output*
+Finally I obtained the output by applying the softmax activation function to generate probability predictions for each pixel.
+
+The whole fcn_model function therefore results in the following code:
+
+```python
+def fcn_model(inputs, num_classes):
+    layer1 = encoder_block(inputs, filters=32, strides=2)
+    layer2 = encoder_block(layer1, filters=64, strides=2)
+    layer3 = conv2d_batchnorm(layer2, filters=128, kernel_size=1, strides=1)
+    layer4 = decoder_block(layer3, layer1, filters=64)
+    layer5 = decoder_block(layer4, inputs, filters=32)
+    return layers.Conv2D(num_classes, 1, activation='softmax', padding='same')(layer5)
+
+```
+
+Here the resulting layer will be the same width and height as the input image and in this case 3 classes deep.
 
 ## 4. Training  
-Since I haven't had the AWS p2x.large instance approved yet, I tried carrying out the training in another instance I already had approved in AWS with unsatisfactory results. For this reason I ended up executing the training process in my own computer (MacBook Pro with NVIDIA GeForce GT 750M graphics card using CUDA and CUDNN).
+Since I haven't had the AWS p2x.large instance approved yet, I tried carrying out the training in another instance I already had approved in AWS with unsatisfactory results. For this reason I ended up executing the training process in my own computer (MacBook Pro with NVIDIA GeForce GT 750M graphics card using CUDA and CUDNN) until I was able to execute it in the p2x.large instance in AWS.
 
-First I carried out a couple of executions with a reduced number of epochs in order to optimize the amount of time it took for the training process and avoid having the process working for too long. 
+First I carried out a couple of executions with a reduced number of epochs in order to optimize the amount of time it took for the training process and avoid having the process working for too long.
+
+My initial hyperparameters were the following:
+
+```python
+learning_rate = 0.010
+batch_size = 32
+num_epochs = 10
+steps_per_epoch = 100
+validation_steps = 50
+workers = 4
+```
 
 10 epochs => approximately 3 hours
 
