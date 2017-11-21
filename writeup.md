@@ -287,7 +287,7 @@ And the resulting images for run_1 seemed to be quite defined and precise:
 
 ![Training result][training-result]
 
-*Possible improvements:*
+**_Possible improvements:_**
 
 After having carried out many tests and tried out many parameters combinations and realizing an increase in image data would have such a significant impact on the result, I think the following could be improved:
 
