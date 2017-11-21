@@ -297,7 +297,5 @@ After having carried out many tests and tried out many parameters combinations a
 
 1. I could also increase the depth of the network by adding more convolutions with skipped connections.
 
-1. Perhaps including additional targets in order to differentiate even more the content of the image.
-
-
+1. For the neural network to be used to follow another target, like for example a dog or cat, it would need to be trained on a new set of data focusing on these new objectives. Also, the encoder and decoder layer dimensions would have to be adjusted according to the depth of the network.
 
