@@ -140,7 +140,11 @@ layer3 = conv2d_batchnorm(layer2, filters=128, kernel_size=1, strides=1)
 ```
 
 **Decoder**
-Within the decoding process, the upsampling part is very important, in order to transform the downsampled image back into the resolution of the original input image. 
+Within the decoding process, the upsampling part is very important, in order to transform the downsampled image back into the dimensions of the original input image, so that the network can classify all the pixels of the input image, although the resulting image will not have the same resolution as the original one.
+
+The upsampling operation fills in the gaps between missing pixel values by interpolation.
+
+The information which was lost during pooling can’t be fully restored by the upsampling operation, which means that the decoder can’t fully recover the spatial resolution. Therefore, to help the decoder recover the object details, I introduced skip connections (as indicated previously in the diagram). These connect the high resolution encoder layers directly to the decoder, so that some of the information from those layers can be restored.
 
 In order to carry out the upsample process I used the bilinear upsample function provided in the notebook:   
 
@@ -150,9 +154,7 @@ def bilinear_upsample(input_layer):
     return output_layer
 ```
 
-Additionally, I have concatenated the layers in order to help skip connections and added some separable convolution layers.
-
-The resulting code for the decoding block is the following:
+Additionally, after concatenating the layers in order to help skip connections and adding some separable convolution layers, the resulting code for the decoding block is the following:
 
 ```python
 def decoder_block(small_ip_layer, large_ip_layer, filters):
