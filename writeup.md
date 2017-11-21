@@ -16,6 +16,8 @@
 [test-scenario31]: ./writeup_images/test-scenario31.png
 [test-scenario32]: ./writeup_images/test-scenario32.png
 [network-diagram]: ./writeup_images/network-diagram.png
+[training-curve]: ./writeup_images/training-curve.png
+[training-result]: ./writeup_images/training-result.png
 
 ## 1. Project Objective 
 The objective of this project is to train a fully convolutional network with images from various scenarios regarding a virtual environment where  a hero is spawned along with people simulations and the corresponding surroundings. The purpose is that the drone using the trained model is able to follow the hero regardless of the obstacles and people along its path. To carry out this, each pixel in the image is classified as either belonging to the target hero or as part of something or someone else in the environment.
@@ -189,9 +191,9 @@ Here the resulting layer will be the same width and height as the input image an
 ## 4. Training  
 Since I haven't had the AWS p2x.large instance approved yet, I tried carrying out the training in another instance I already had approved in AWS with unsatisfactory results. For this reason I ended up executing the training process in my own computer (MacBook Pro with NVIDIA GeForce GT 750M graphics card using CUDA and CUDNN) until I was able to execute it in the p2x.large instance in AWS.
 
-First I carried out a couple of executions with a reduced number of epochs in order to optimize the amount of time it took for the training process and avoid having the process working for too long.
+First I carried out a couple of executions with a reduced number of epochs in order to optimize the amount of time it took for the training process and avoid having the process working for too long, and then I progressively modified the parameters increasingly and therefore increasing the amount of time required to process the training data.
 
-The definition of each component of the hyperparameters is the following:
+The definition of each component of the hyperparameters is the following, being the different values used for each case defined in the [Results and Improvements](#5.-results-and-improvements) section below.
 
 *batch_size*: number of training samples/images that get propagated through the network in a single pass.
 
@@ -205,6 +207,8 @@ The definition of each component of the hyperparameters is the following:
 
 workers: This is the number of processes we can start on the CPU/GPU.
 
+## 5. Results and Improvements
+
 My initial hyperparameters were the following:
 
 ```python
@@ -216,10 +220,82 @@ validation_steps = 50
 workers = 4
 ```
 
-This process took approximately 3 hours to execute (15-20 mins per epoch) and gave a final result of 0.32, which happend to be a bit disappointing.
+This process took approximately 2 hours to execute (10-15 mins per epoch) and gave a final score of 0.32, which isn't completely bad, but could definitely be improved.
+
+Afterwards, after several minor tests I decided to increase the steps_per_epoch to 200 and the number of epochs from 10 to 50. The hyperparameters for this case were the following:
+
+```python
+learning_rate = 0.010
+batch_size = 32
+num_epochs = 50
+steps_per_epoch = 200
+validation_steps = 50
+workers = 4
+```
+
+This process took quite a while (approximately 16 hours) and in the end it obtained a final score of 0.35. This was definitely an improvement (3 % more), although I wasn't completely convinced by the relation between result and improvement, since it took quite a while to process this case.
+
+After this I had my AWS instance approved and I began to try out various parameters and couldn't find an effective way to improve the results, so I recurred to increasing the training data by carrying out additional image gathering.
+
+After this process, I trained again the network with the new added content and was quite surprised about how this had improved the result. In order to test this new data set I began with the following hyperparameters:
+
+```python
+learning_rate = 0.010
+batch_size = 32
+num_epochs = 10
+steps_per_epoch = 200
+validation_steps = 50
+workers = 40
+```
+(In this case I increased the number of workers given I was now executing the code in AWS instead of my own computer)
+
+After training the network again with these parameters, I obtained a final score of 0.398, being quite close to the required result, I just needed to improve it a bit more.
+
+Therefore, I slightly increased the number of epochs. First I increased it to 20, but the result decreased considerably to 0.35. I then tried using epochs closer to 10 like 11 - 12, but the result was still worse than the previous case.
+
+For this reason I ended up recurring to modify the encoder, convolutional and decoder layers, applying filters of 64 x 128 x 256 instead of the previous 32 x 64 x128, modifying therefore the fcn_model function to the following, even though this basically doubled the execution time required for the training process, but since I was already executing it in AWS, it was still acceptable.
+
+```python
+def fcn_model(inputs, num_classes):
+    number of filters) increases.
+    layer1 = encoder_block(inputs, filters=64, strides=2)
+    layer2 = encoder_block(layer1, filters=128, strides=2)
+    layer3 = conv2d_batchnorm(layer2, filters=256, kernel_size=1, strides=1)
+    layer4 = decoder_block(layer3, layer1, filters=128)
+    layer5 = decoder_block(layer4, inputs, filters=64)
+    return layers.Conv2D(num_classes, 1, activation='softmax', padding='same')(layer5)
+```
+
+With this configuration and the following hyperparameters:
+
+```python
+learning_rate = 0.010
+batch_size = 32
+num_epochs = 10
+steps_per_epoch = 200
+validation_steps = 50
+workers = 40
+```
+
+I managed to obtain a final score of 0.417 which is at last over the required score of 0.40.
+
+The training curve obtained for this case was the following:
+
+![Training curve][training-curve]
+
+And the resulting images for run_1 seemed to be quite defined and precise:
+
+![Training result][training-result]
+
+*Possible improvements:*
+
+After having carried out many tests and tried out many parameters combinations and realizing an increase in image data would have such a significant impact on the result, I think the following could be improved:
+
+1. As indicated, increasing the training data has a significant impact on the result of the network, although it would have its counterpart, meaning that it would require more time and resources to train the network with all the new data included.
+
+1. I could also increase the depth of the network by adding more convolutions with skipped connections.
+
+1. Perhaps including additional targets in order to differentiate even more the content of the image.
 
 
 
-
-
-## 5. Results and Improvements  
