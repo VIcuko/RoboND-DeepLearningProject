@@ -222,7 +222,7 @@ workers = 4
 
 This process took approximately 2 hours to execute (10-15 mins per epoch) and gave a final score of 0.32, which isn't completely bad, but could definitely be improved.
 
-Afterwards, after several minor tests I decided to increase the steps_per_epoch to 200 and the number of epochs from 10 to 50, and reduce the learningrate to 0.010 to avoid overfitting and obtain more reliable results. The hyperparameters for this case were the following:
+Afterwards, after several minor tests I decided to increase the steps_per_epoch to 200 and the number of epochs from 10 to 50, and reduce the learningrate to 0.005 to avoid overfitting and obtain more reliable results. The hyperparameters for this case were the following:
 
 ```python
 learning_rate = 0.005
