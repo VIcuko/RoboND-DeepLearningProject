@@ -287,6 +287,8 @@ And the resulting images for run_1 seemed to be quite defined and precise:
 
 ![Training result][training-result]
 
+After having completed the training, I tried out the follow me on the simulator and the drone was able to follow the hero along all the path, so it seems the resulting model is working quite well.
+
 **_Possible improvements:_**
 
 After having carried out many tests and tried out many parameters combinations and realizing an increase in image data would have such a significant impact on the result, I think the following could be improved:
