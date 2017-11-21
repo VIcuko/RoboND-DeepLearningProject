@@ -85,7 +85,7 @@ Layer 5 | Decoder | 80 x 80 x 32
 
 Below I'm describing the steps for this configuration in further detail:
 
-*Encoders*  
+**Encoders**  
 The role of the encoders in the network is to identify the important features in the images being loaded, then keep those features in memory and remove any added noise, decreasing the width and height at the same time they increase the depth of the layer.
 
 For the encoder block, I included a separable convolution layer using the separable_conv2d_batchnorm() function as follows:
@@ -124,7 +124,7 @@ layer1 = encoder_block(inputs, filters=32, strides=2)
 layer2 = encoder_block(layer1, filters=64, strides=2)
 ```
 
-*Convolution layer*  
+**Convolution layer**  
 The convolution layer is placed between the encoder layers and the decoder layers.
 I have used a 1 x 1 convolution layer with the purpose of semantic segmentation. This has several advantages for the network:
 
@@ -139,7 +139,7 @@ Therefore, the corresponding line of code within the fcn_model function is:
 layer3 = conv2d_batchnorm(layer2, filters=128, kernel_size=1, strides=1)
 ```
 
-*Decoder*
+**Decoder**
 Within the decoding process, the upsampling part is very important, in order to transform the downsampled image back into the resolution of the original input image. 
 
 In order to carry out the upsample process I used the bilinear upsample function provided in the notebook:   
@@ -170,7 +170,7 @@ layer4 = decoder_block(layer3, layer1, filters=64)
 layer5 = decoder_block(layer4, inputs, filters=32)
 ```
 
-*Output*
+**Output**
 Finally I obtained the output by applying the softmax activation function to generate probability predictions for each pixel.
 
 The whole fcn_model function therefore results in the following code:
@@ -195,15 +195,15 @@ First I carried out a couple of executions with a reduced number of epochs in or
 
 The definition of each component of the hyperparameters is the following, being the different values used for each case defined in the [Results and Improvements](#5.-results-and-improvements) section below.
 
-*batch_size*: number of training samples/images that get propagated through the network in a single pass.
+**batch_size**: number of training samples/images that get propagated through the network in a single pass.
 
-*num_epochs*: number of times the entire training dataset gets propagated through the network.
+**num_epochs**: number of times the entire training dataset gets propagated through the network.
 
-*steps_per_epoch*: number of batches of training images that go through the network in 1 epoch. One recommended value to try would be based on the total number of images in training dataset divided by the batch_size.
+**steps_per_epoch**: number of batches of training images that go through the network in 1 epoch. One recommended value to try would be based on the total number of images in training dataset divided by the batch_size.
 
-*validation_steps*: number of batches of validation images that go through the network in 1 epoch. This is similar to steps_per_epoch, except validation_steps is for the validation dataset.
+**validation_steps**: number of batches of validation images that go through the network in 1 epoch. This is similar to steps_per_epoch, except validation_steps is for the validation dataset.
 
-*workers*: maximum number of processes to spin up.
+**workers**: maximum number of processes to spin up.
 
 workers: This is the number of processes we can start on the CPU/GPU.
 
@@ -222,10 +222,10 @@ workers = 4
 
 This process took approximately 2 hours to execute (10-15 mins per epoch) and gave a final score of 0.32, which isn't completely bad, but could definitely be improved.
 
-Afterwards, after several minor tests I decided to increase the steps_per_epoch to 200 and the number of epochs from 10 to 50. The hyperparameters for this case were the following:
+Afterwards, after several minor tests I decided to increase the steps_per_epoch to 200 and the number of epochs from 10 to 50, and reduce the learningrate to 0.010 to avoid overfitting and obtain more reliable results. The hyperparameters for this case were the following:
 
 ```python
-learning_rate = 0.010
+learning_rate = 0.005
 batch_size = 32
 num_epochs = 50
 steps_per_epoch = 200
@@ -240,7 +240,7 @@ After this I had my AWS instance approved and I began to try out various paramet
 After this process, I trained again the network with the new added content and was quite surprised about how this had improved the result. In order to test this new data set I began with the following hyperparameters:
 
 ```python
-learning_rate = 0.010
+learning_rate = 0.005
 batch_size = 32
 num_epochs = 10
 steps_per_epoch = 200
@@ -269,7 +269,7 @@ def fcn_model(inputs, num_classes):
 With this configuration and the following hyperparameters:
 
 ```python
-learning_rate = 0.010
+learning_rate = 0.005
 batch_size = 32
 num_epochs = 10
 steps_per_epoch = 200
